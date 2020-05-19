@@ -5,7 +5,7 @@ description = "Runtime-type-checker performs type check at runtime with help of 
 license = "MIT"
 authors = ["PJCampi <pierrejean.campigotto@gmail.com>"]
 readme = "README.md"
-repository="https://github.com/pjcampi/runtime_type_checker"
+repository="https://github.com/pjcampi/runtime-type-checker"
 classifiers=[
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
@@ -17,6 +17,8 @@ classifiers=[
 [tool.poetry.dependencies]
 python = "^3.6.1"
 typing_inspect = "^0.6.0"
+flake8 = "^3.8.1"
+dataclasses = { version = "0.7", python = "~3.6" }
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.2"
