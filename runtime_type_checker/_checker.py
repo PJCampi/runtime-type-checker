@@ -1,12 +1,12 @@
 """Main module."""
 from collections.abc import Collection, Iterable, Mapping
 from contextlib import suppress
-import sys
+from inspect import isclass
+from functools import lru_cache
 from typing import (
     Any,
     get_type_hints,
     Union,
-    _eval_type,
     _type_check as _base_type_check,
 )
 
@@ -27,11 +27,17 @@ from typing_inspect import (
     NEW_TYPING,
 )
 
-from .utils import type_repr
+from .utils import evaluate_forward_reference, type_repr
 
 __all__ = [
     "check_type",
 ]
+
+USE_CACHING = False
+if USE_CACHING:
+    _base_type_check = lru_cache(maxsize=4096)(_base_type_check)
+    get_type_hints = lru_cache(maxsize=4096)(get_type_hints)
+    evaluate_forward_reference = lru_cache(maxsize=512)(evaluate_forward_reference)
 
 
 def check_type(instance, type_or_hint, *, is_argument: bool = True) -> None:
@@ -48,23 +54,8 @@ def _check_instance_or_type(
     if type_or_hint is Any:
         return
 
-    if is_union_type(type_or_hint):
-        return _check_union(instance_or_type, type_or_hint, instance_check=instance_check)
-
-    if is_typevar(type_or_hint):
-        return _check_type_var(instance_or_type, type_or_hint, instance_check=instance_check)
-
-    if is_tuple_type(type_or_hint):
-        return _check_tuple(instance_or_type, type_or_hint, instance_check=instance_check)
-
-    if is_new_type(type_or_hint):
-        return _check_new_type(instance_or_type, type_or_hint, instance_check=instance_check)
-
     if _is_type(type_or_hint):
         return _check_type(instance_or_type, type_or_hint)
-
-    if is_callable_type(type_or_hint):
-        return _check_callable(instance_or_type, type_or_hint)
 
     if is_literal_type(type_or_hint):
         return _check_literal_type(instance_or_type, type_or_hint)
@@ -87,17 +78,32 @@ def _check_instance_or_type(
                 f"I could not check: '{instance_or_type}' with generic type hint: '{type_or_hint}'"
             ) from e
 
+    if is_tuple_type(type_or_hint):
+        return _check_tuple(instance_or_type, type_or_hint, instance_check=instance_check)
+
+    if is_callable_type(type_or_hint):
+        return _check_callable(instance_or_type, type_or_hint)
+
+    if isclass(type_or_hint):
+        if _is_typed_dict(type_or_hint):
+            return _check_typed_dict(instance_or_type, type_or_hint, instance_check=instance_check)
+        return _check_concrete_type(instance_or_type, type_or_hint, instance_check=instance_check)
+
+    if is_union_type(type_or_hint):
+        return _check_union(instance_or_type, type_or_hint, instance_check=instance_check)
+
+    if is_typevar(type_or_hint):
+        return _check_type_var(instance_or_type, type_or_hint, instance_check=instance_check)
+
+    if is_new_type(type_or_hint):
+        return _check_new_type(instance_or_type, type_or_hint, instance_check=instance_check)
+
     if is_forward_ref(type_or_hint):
         _check_forward_reference(instance_or_type, type_or_hint, instance_check=instance_check)
         return
 
     if is_classvar(type_or_hint):
         return _check_class_var(instance_or_type, type_or_hint, instance_check=instance_check)
-
-    if isinstance(type_or_hint, type):
-        if _is_typed_dict(type_or_hint):
-            return _check_typed_dict(instance_or_type, type_or_hint, instance_check=instance_check)
-        return _check_concrete_type(instance_or_type, type_or_hint, instance_check=instance_check)
 
     raise NotImplementedError(f"I could not check: '{instance_or_type}' with type or hint: '{type_or_hint}'")
 
@@ -130,7 +136,7 @@ def _check_collection(instance_or_type, collection_type, *, instance_check: bool
 def _check_concrete_type(instance_or_type, concrete_type, *, instance_check: bool = True) -> None:
     if not (isinstance if instance_check else issubclass)(instance_or_type, concrete_type):
         raise TypeError(
-            f"Type: {_get_type_repr(instance_or_type, instance_check)} is not consistent with "
+            f"Type: '{_get_type_repr(instance_or_type, instance_check)}' is not consistent with "
             f"expected type: '{_get_type_repr(concrete_type, False)}'."
         )
 
@@ -269,11 +275,7 @@ def _check_union(instance_or_type, union_type, *, instance_check: bool = True) -
 
 def _get_forward_type(instance_or_type, forward_reference):
     if not forward_reference.__forward_evaluated__:
-        try:
-            globalns = sys.modules[instance_or_type.__module__].__dict__
-        except (KeyError, AttributeError):
-            globalns = None
-        _eval_type(forward_reference, globalns, None)
+        return evaluate_forward_reference(forward_reference, getattr(instance_or_type, "__module__", None))
     return forward_reference.__forward_value__
 
 
