@@ -125,11 +125,12 @@ skip_before_3_8 = pytest.mark.skipif(not PYTHON_38, reason="feature exists only 
     ],
 )
 def test_type_check(type_or_hint, instance, raises):
-    if raises:
-        with pytest.raises(TypeError):
-            check_type(instance, type_or_hint)
-    else:
-        check_type(instance, type_or_hint, is_argument=False)
+    for _ in range(1):
+        if raises:
+            with pytest.raises(TypeError):
+                check_type(instance, type_or_hint)
+        else:
+            check_type(instance, type_or_hint, is_argument=False)
 
 
 @pytest.mark.parametrize(
@@ -181,6 +182,12 @@ def test_check_type_with_class(args, kwargs, raises):
         pytest.param(my_func, ("a", 1, MyClass(), 1), {}, True, id="wrong_vararg"),
         pytest.param(my_func, ("a", 1), {"x": 1}, True, id="wrong_kwarg"),
         pytest.param(lambda x: 1, ("a",), {}, False, id="lambda"),
+        pytest.param(MyClass().my_method, (1,), {}, False, id="method"),
+        pytest.param(MyClass().my_method, ("a",), {}, True, id="method__wrong_arg"),
+        pytest.param(MyClass.my_class_method, (1,), {}, False, id="class_method"),
+        pytest.param(MyClass.my_class_method, ("a",), {}, True, id="class_method__wrong_arg"),
+        pytest.param(MyClass.my_static_method, (1,), {}, False, id="static_method"),
+        pytest.param(MyClass.my_static_method, ("a",), {}, True, id="static_method__wrong_arg"),
     ],
 )
 def test_check_type_with_func(func, args, kwargs, raises):

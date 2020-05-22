@@ -31,6 +31,17 @@ class MyClass:
     b: Tuple[str, str] = ("a", "b")
     c: Optional["MyClass"] = None
 
+    @staticmethod
+    def my_static_method(a: int) -> str:
+        return str(a)
+
+    @classmethod
+    def my_class_method(cls, a: int) -> str:
+        return str(cls.t + a)
+
+    def my_method(self, a: int) -> str:
+        return str(a + self.a)
+
 
 @dataclass
 class MyDerived(MyClass):
