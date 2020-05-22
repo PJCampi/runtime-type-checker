@@ -1,6 +1,3 @@
-====================
-runtime-type-checker
-====================
 
 This package performs type-check at runtime with help of type annotations.
 
@@ -64,12 +61,12 @@ bar(True, c=1)  # raises TypeError
 
 ### Package features and short-comings
 
-####1- Features
+#### 1- Features
 - _simplicity_: there's only one function and one decorator to keep in mind.
 - _robustness_: this package relies on the `typing-inspect` for the heavy lifting. This package is maintained by
 core contributors to the typing module, which means very little hacks on my side to work with older versions of python.
 
-####2- Short-comings
+#### 2- Short-comings
 - _slow_: The library is not very fast. I think it should be built upon a two stage process:
     1. construct the type-checker for the type and cache it.
     2. use the cached type-checker to check type annotations.
