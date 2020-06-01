@@ -38,6 +38,7 @@ from .fixtures import (
     my_func,
     MyTpDict,
     MyGeneric,
+    MyGenericImpl,
     PYTHON_38,
 )
 
@@ -105,20 +106,16 @@ skip_before_3_8 = pytest.mark.skipif(not PYTHON_38, reason="feature exists only 
         pytest.param(Callable[[int], int], lambda x: 1, False, id="callable"),
         pytest.param(Callable_co, lambda x: 1, False, id="callable__concrete"),
         pytest.param(MyClass, MyClass(2, ("a", "c"), MyClass()), False, id="class"),
-        pytest.param(MyClass, MyClass(2, ("a",), MyClass()), True, id="class__wrong_attribute"),
         pytest.param(MyDerived, MyDerived(2, d=0), False, id="class__inherited"),
         pytest.param(MyClass, MyDerived(), False, id="class__inherited_from_base"),
-        pytest.param(MyClass, MyDerived("str"), True, id="class__inherited_from_base_wrong_derived"),
-        pytest.param(MyClass, MyDerived(d="str"), False, id="class__inherited_from_base_wrong_base"),
-        pytest.param(MyDerived, MyDerived(d="str"), True, id="class__inherited_wrong_derived"),
+        pytest.param(MyClass, 1, True, id="class__wrong_type"),
         pytest.param(MyTpDict, {"a": "a", "b": MyClass()}, False, id="typed_dict", marks=skip_before_3_8),
         pytest.param(
             MyTpDict, {"a": "a", "b": MyClass(), "c": 1}, True, id="typed_dict__extra_key", marks=skip_before_3_8
         ),
         pytest.param(MyTpDict, {"a": "a"}, True, id="typed_dict__too_few_keys", marks=skip_before_3_8),
         pytest.param(MyTpDict, {"a": "a", "b": 2}, True, id="typed_dict__wrong_val_type", marks=skip_before_3_8),
-        pytest.param(MyGeneric[str], MyGeneric("a"), False, id="generic_class"),
-        pytest.param(MyGeneric[str], MyGeneric(1), True, id="generic_class__wrong_type"),
+        pytest.param(MyGeneric[str], MyGeneric("a"), False, id="generic"),
         pytest.param(Literal[1, 2, 3], 1, False, id="literal"),
         pytest.param(Literal[1, 2, 3], 4, True, id="literal__wrong_val"),
         pytest.param(Literal[1, 2, 3], "1", True, id="literal__wrong_type"),
@@ -157,22 +154,27 @@ def test_to_type_hints(func, expected):
 
 
 @pytest.mark.parametrize(
-    "args, kwargs, raises",
+    "kls, args, kwargs, raises",
     [
-        pytest.param(tuple(), {}, False, id="no_args"),
-        pytest.param(("a",), {}, True, id="wrong_arg"),
-        pytest.param(tuple(), {"c": MyClass()}, False, id="forward_ref__ok"),
-        pytest.param(tuple(), {"c": MyClass("a"), "d": "str"}, True, id="forward_ref__wrong"),
+        pytest.param(MyDerived, tuple(), {}, False, id="no_args"),
+        pytest.param(MyDerived, ("a",), {}, True, id="wrong_arg"),
+        pytest.param(MyDerived, tuple(), {"c": MyClass(c=MyClass())}, False, id="forward_ref__ok"),
+        pytest.param(MyDerived, tuple(), {"c": MyClass(c=MyClass("a")), "d": "str"}, True, id="forward_ref__wrong"),
+        pytest.param(MyGeneric, ("1",), {}, False, id="generic"),
+        pytest.param(MyGeneric, (1,), {}, True, id="generic__wrong_args"),
+        pytest.param(MyGenericImpl, ("1",), {}, False, id="generic_impl"),
+        pytest.param(MyGenericImpl, (1,), {}, True, id="generic_impl__wrong_args"),
     ],
 )
-def test_check_type_with_class(args, kwargs, raises):
-    class_with_check = check_types(MyDerived)
+def test_check_type_with_class(kls, args, kwargs, raises):
     if raises:
-        with pytest.raises(TypeError):
+        with pytest.raises((TypeError, NotImplementedError)):
+            class_with_check = check_types(kls)
             class_with_check(*args, **kwargs)
     else:
+        class_with_check = check_types(kls)
         instance = class_with_check(*args, **kwargs)
-        assert isinstance(instance, MyDerived)
+        assert isinstance(instance, kls)
 
 
 @pytest.mark.parametrize(

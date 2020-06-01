@@ -7,8 +7,13 @@ from typing import (
     get_type_hints,
     Mapping,
     Sequence,
-    _eval_type,
 )
+
+try:
+    from typing import _eval_type
+except ImportError as e:
+    raise NotImplementedError("runtime-type-checker is incompatible with the version of python used.") from e
+
 
 __all__ = ["evaluate_forward_reference", "get_func_type_hints", "type_repr"]
 

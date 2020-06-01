@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "runtime-type-checker"
-version = "0.1.0"
+version = "0.2.0"
 description = "Runtime-type-checker performs type check at runtime with help of type annotations"
 license = "MIT"
 authors = ["PJCampi <pierrejean.campigotto@gmail.com>"]

@@ -44,13 +44,17 @@ class MyClass:
 
 
 @dataclass
-class MyDerived(MyClass):
-    d: int = 0
+class MyGeneric(Generic[T_bound]):
+    a: T_bound
+
+
+class MyGenericImpl(MyGeneric[str]):
+    pass
 
 
 @dataclass
-class MyGeneric(Generic[T_bound]):
-    a: T_bound
+class MyDerived(MyClass):
+    d: int = 0
 
 
 NewString = NewType("NewString", str)

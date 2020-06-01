@@ -12,6 +12,8 @@ I provide a few simple examples here. For a complete overview, have a look at th
 You can check an object against a type or an annotation via the `check_type` function.
 
 The function returns `None` if the check was successful or raises a `TypeError` in case of error.
+
+Note that this function does not check recursively for e.g. the attributes of a class.
 ```
 from dataclasses import dataclass
 from runtime_type_checker import check_type
@@ -28,8 +30,7 @@ Foo:
 
 
 check_type(Foo(1), Foo)  # OK
-check_type(Foo(0, {"a": "b"}), Foo)  # raises TypeError
-
+check_type(Foo(1), int)  # raises TypeError
 ```
 
 #### 2- The check_types decorator
@@ -67,11 +68,6 @@ bar(True, c=1)  # raises TypeError
 core contributors to the typing module, which means very little hacks on my side to work with older versions of python.
 
 #### 2- Short-comings
-- _slow_: The library is not very fast. I think it should be built upon a two stage process:
-    1. construct the type-checker for the type and cache it.
-    2. use the cached type-checker to check type annotations.
-
-    That way one avoids going through the search for a type-checker every time an instance is checked against the type.
 
 - _coverage_: I don't offer coverage for all features of type annotations: for example Protocol, Generators, IO are not
-currently supported.
+currently supported. Generics are not really well handled.
