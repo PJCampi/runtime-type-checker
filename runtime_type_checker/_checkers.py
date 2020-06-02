@@ -294,7 +294,10 @@ class ForwardTypeChecker(TypeChecker):
             if self._type.__forward_evaluated__:
                 forward_type = self._type.__forward_value__
             else:
-                forward_type = evaluate_forward_reference(self._type, getattr(instance_or_type, "__module__", None))
+                try:
+                    forward_type = evaluate_forward_reference(self._type, getattr(instance_or_type, "__module__", None))
+                except NameError:
+                    raise TypeError(f"I could not evaluate forward type: '{self._type_repr}' using: {instance_or_type}")
             self._forward_type_checker = self.get(forward_type, is_argument=self._is_argument)
         return self._forward_type_checker
 

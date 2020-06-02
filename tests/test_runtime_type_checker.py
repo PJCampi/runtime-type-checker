@@ -95,6 +95,7 @@ skip_before_3_8 = pytest.mark.skipif(not PYTHON_38, reason="feature exists only 
         pytest.param(T_constraint, [1], True, id="type_variable__none"),
         pytest.param("int", 1, False, id="forward_reference__literal"),
         pytest.param("MyClass", MyClass(), False, id="forward_reference__class"),
+        pytest.param(Optional["MyClass"], None, False, id="forward_reference__optional"),
         pytest.param(NewString, NewString("1"), False, id="new_type"),
         pytest.param(str, NewString("1"), False, id="new_type__string"),
         pytest.param(NewList, NewList(["1"]), False, id="new_type__nested"),
