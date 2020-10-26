@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "runtime-type-checker"
-version = "0.3.0"
+version = "0.0.0"
 description = "Runtime-type-checker performs type check at runtime with help of type annotations"
 license = "MIT"
 authors = ["PJCampi <pierrejean.campigotto@gmail.com>"]
@@ -32,6 +32,9 @@ pytest-coverage = "^0.0"
 mypy = "^0.770"
 pre-commit = "^2.4.0"
 
+[tool.poetry-dynamic-versioning]
+enable = true
+
 [build-system]
-requires = ["poetry>=0.12"]
+requires = ["poetry>=0.12", "poetry-dynamic-versioning"]
 build-backend = "poetry.masonry.api"

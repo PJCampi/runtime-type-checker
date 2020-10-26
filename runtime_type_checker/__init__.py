@@ -3,4 +3,4 @@ from ._checkers import *  # noqa: F401,F403
 
 __author__ = """Pierre-Jean Campigotto"""
 __email__ = "pierrejean.campigotto@gmail.com"
-__version__ = "0.3.0"
+__version__ = "0.0.0"
