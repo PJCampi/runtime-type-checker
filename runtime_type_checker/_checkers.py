@@ -21,7 +21,7 @@ from typing_inspect import (
     get_origin,
 )
 
-from .typing_inspect_extensions import is_valid_type, is_type, is_typed_dict
+from .typing_inspect_extensions import get_origin_or_self, is_valid_type, is_type, is_typed_dict
 from .utils import evaluate_forward_reference, get_func_type_hints, type_repr
 
 __all__ = ["check_type", "check_types", "TypeChecker", "USE_CACHING"]
@@ -126,7 +126,7 @@ class TypeChecker(metaclass=ABCMeta):
             return LiteralTypeChecker.make(type_or_hint, is_argument)
 
         if is_generic_type(type_or_hint):
-            origin = get_origin(type_or_hint)
+            origin = get_origin_or_self(type_or_hint)
             if issubclass(origin, MappingCol):
                 return MappingTypeChecker.make(type_or_hint, is_argument)
 
@@ -360,7 +360,7 @@ class GenericTypeChecker(TypeChecker):
 
     @classmethod
     def make(cls, type_or_hint, is_argument: bool) -> "GenericTypeChecker":
-        origin = get_origin(type_or_hint)
+        origin = get_origin_or_self(type_or_hint)
         origin_type_checker = ConcreteTypeChecker.make(origin, is_argument)
         # CONSIDER: how do we ensure that the bound type or constraints are respected by the type?
         return cls(type_or_hint, origin_type_checker)

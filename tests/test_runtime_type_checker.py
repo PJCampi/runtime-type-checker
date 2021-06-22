@@ -40,9 +40,13 @@ from .fixtures import (
     MyGeneric,
     MyGenericImpl,
     PYTHON_38,
+    PYTHON_39,
+    ListOfString,
+    DictOfStringToInt,
 )
 
 skip_before_3_8 = pytest.mark.skipif(not PYTHON_38, reason="feature exists only in python 3.8")
+skip_before_3_9 = pytest.mark.skipif(not PYTHON_39, reason="feature exists only in python 3.8")
 
 
 @pytest.mark.parametrize(
@@ -73,6 +77,10 @@ skip_before_3_8 = pytest.mark.skipif(not PYTHON_38, reason="feature exists only 
         pytest.param(Dict, {"a": 1}, False, id="mapping__non_parametrized"),
         pytest.param(Dict, {"a", 1}, True, id="mapping__non_parametrized_wrong_type"),
         pytest.param(dict, {"a": 1}, False, id="mapping__plain"),
+        pytest.param(DictOfStringToInt, {"a": 1}, False, id="mapping__generic_w_concrete", marks=skip_before_3_9),
+        pytest.param(
+            DictOfStringToInt, {"a": "a"}, True, id="mapping__generic_w_concrete_wrong", marks=skip_before_3_9
+        ),
         pytest.param(Dict[str, int], {1: 1}, True, id="mapping__wrong_key"),
         pytest.param(Dict[str, int], {"a": "a"}, True, id="mapping__wrong_key"),
         pytest.param(Collection[str], frozenset(["a", "b"]), False, id="collection__abstract"),
@@ -85,6 +93,8 @@ skip_before_3_8 = pytest.mark.skipif(not PYTHON_38, reason="feature exists only 
         pytest.param(List[List["MyClass"]], [[MyClass()]], False, id="collection__nested"),
         pytest.param(List, ["a", 1], False, id="collection__non_parametrized"),
         pytest.param(list, ["a", 1], False, id="collection__plain"),
+        pytest.param(ListOfString, ["a", "b"], False, id="collection__generic_w_concrete", marks=skip_before_3_9),
+        pytest.param(ListOfString, ["a", 1], True, id="collection__generic_w_concrete_wrong", marks=skip_before_3_9),
         pytest.param(T_bound, datetime(2020, 1, 1), False, id="type_variable__bound_date"),
         pytest.param(T_bound, "2020__01__01", False, id="type_variable__bound_str"),
         pytest.param(T_bound, 1, True, id="type_variable__bound_int"),
@@ -116,7 +126,8 @@ skip_before_3_8 = pytest.mark.skipif(not PYTHON_38, reason="feature exists only 
         ),
         pytest.param(MyTpDict, {"a": "a"}, True, id="typed_dict__too_few_keys", marks=skip_before_3_8),
         pytest.param(MyTpDict, {"a": "a", "b": 2}, True, id="typed_dict__wrong_val_type", marks=skip_before_3_8),
-        pytest.param(MyGeneric[str], MyGeneric("a"), False, id="generic"),
+        pytest.param(MyGeneric[str], MyGeneric("a"), False, id="generic__concrete"),
+        pytest.param(MyGeneric, MyGeneric("a"), False, id="generic__concrete_no_typevar"),
         pytest.param(Literal[1, 2, 3], 1, False, id="literal"),
         pytest.param(Literal[1, 2, 3], 4, True, id="literal__wrong_val"),
         pytest.param(Literal[1, 2, 3], "1", True, id="literal__wrong_type"),

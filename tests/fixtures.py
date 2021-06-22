@@ -20,6 +20,15 @@ else:
         pass
 
 
+if sys.version_info >= (3, 9):
+    PYTHON_39 = True
+    ListOfString = list[str]
+    DictOfStringToInt = dict[str, int]
+else:
+    PYTHON_39 = False
+    ListOfString = DictOfStringToInt = "irrelevant"
+
+T = TypeVar("T")
 T_bound = TypeVar("T_bound", bound=Union[date, str])
 T_constraint = TypeVar("T_constraint", Union[date, str], Optional[int])
 

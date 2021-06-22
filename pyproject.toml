@@ -12,6 +12,7 @@ classifiers=[
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
 ]
 packages = [
     { include = "runtime_type_checker" },
@@ -21,7 +22,7 @@ include = ["README.md", "LICENSE"]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
-typing_inspect = "^0.6.0"
+typing_inspect = "^0.7.1"
 dataclasses = { version = "0.7", python = "~3.6" }
 
 [tool.poetry.dev-dependencies]

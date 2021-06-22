@@ -5,7 +5,14 @@ except ImportError as e:
 
 from typing_inspect import NEW_TYPING, get_origin, is_classvar, is_generic_type
 
-__all__ = ["is_type", "is_typed_dict", "is_valid_type"]
+__all__ = ["get_origin_or_self", "is_type", "is_typed_dict", "is_valid_type"]
+
+
+def get_origin_or_self(type_or_hint):
+    origin = get_origin(type_or_hint)
+    if origin is None:
+        return type_or_hint
+    return origin
 
 
 def is_type(type_or_hint) -> bool:
