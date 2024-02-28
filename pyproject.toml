@@ -22,7 +22,7 @@ include = ["README.md", "LICENSE"]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
-typing_inspect = "^0.7.1"
+typing_inspect = "^0.9.0"
 dataclasses = { version = "0.7", python = "~3.6" }
 
 [tool.poetry.dev-dependencies]
